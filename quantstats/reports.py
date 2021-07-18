@@ -68,7 +68,8 @@ def html(returns, benchmark=None, rf=0., grayscale=False,
     mtrx = metrics(returns=returns, benchmark=benchmark,
                    rf=rf, display=False, mode='full',
                    sep=True, internal="True",
-                   compounded=compounded)[2:]
+                   compounded=compounded,
+                   trading_year_days=trading_year_days)[2:]
     mtrx.index.name = 'Metric'
     tpl = tpl.replace('{{metrics}}', _html_table(mtrx))
     tpl = tpl.replace('<tr><td></td><td></td><td></td></tr>',
@@ -237,7 +238,8 @@ def full(returns, benchmark=None, rf=0., grayscale=False,
         iDisplay(iHTML('<h4>Performance Metrics</h4>'))
         iDisplay(metrics(returns=returns, benchmark=benchmark,
                          rf=rf, display=display, mode='full',
-                         compounded=compounded))
+                         compounded=compounded,
+                         trading_year_days=trading_year_days))
         iDisplay(iHTML('<h4>5 Worst Drawdowns</h4>'))
         if dd_info.empty:
             iDisplay(iHTML("<p>(no drawdowns)</p>"))
@@ -249,7 +251,8 @@ def full(returns, benchmark=None, rf=0., grayscale=False,
         print('[Performance Metrics]\n')
         metrics(returns=returns, benchmark=benchmark,
                 rf=rf, display=display, mode='full',
-                compounded=compounded)
+                compounded=compounded,
+                trading_year_days=trading_year_days)
         print('\n\n')
         print('[5 Worst Drawdowns]\n')
         if dd_info.empty:
@@ -273,13 +276,15 @@ def basic(returns, benchmark=None, rf=0., grayscale=False,
         iDisplay(iHTML('<h4>Performance Metrics</h4>'))
         metrics(returns=returns, benchmark=benchmark,
                 rf=rf, display=display, mode='basic',
-                compounded=compounded)
+                compounded=compounded,
+                trading_year_days=trading_year_days)
         iDisplay(iHTML('<h4>Strategy Visualization</h4>'))
     else:
         print('[Performance Metrics]\n')
         metrics(returns=returns, benchmark=benchmark,
                 rf=rf, display=display, mode='basic',
-                compounded=compounded)
+                compounded=compounded,
+                trading_year_days=trading_year_days)
 
         print('\n\n')
         print('[Strategy Visualization]\nvia Matplotlib')
@@ -308,7 +313,8 @@ def metrics(returns, benchmark=None, rf=0., display=True,
 
     if isinstance(returns, _pd.DataFrame):
         if len(returns.columns) > 1:
-            raise ValueError("`returns` needs to be a Pandas Series. DataFrame was passed")
+            raise ValueError(
+                "`returns` needs to be a Pandas Series. DataFrame was passed")
         returns = returns[returns.columns[0]]
 
     df = _pd.DataFrame({"returns": _utils._prepare_returns(returns, rf)})
@@ -363,9 +369,11 @@ def metrics(returns, benchmark=None, rf=0., display=True,
     metrics['Longest DD Days'] = blank
 
     if mode.lower() == 'full':
-        ret_vol = _stats.volatility(df['returns'], win_year, True, win_year) * pct
+        ret_vol = _stats.volatility(
+            df['returns'], win_year, True, win_year) * pct
         if "benchmark" in df:
-            bench_vol = _stats.volatility(df['benchmark'], win_year, True, win_year) * pct
+            bench_vol = _stats.volatility(
+                df['benchmark'], win_year, True, win_year) * pct
             metrics['Volatility (ann.) %'] = [ret_vol, bench_vol]
             metrics['R^2'] = _stats.r_squared(df['returns'], df['benchmark'])
         else:
